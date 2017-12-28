@@ -19,6 +19,8 @@ import {
     Trie
 } from './Trie';
 
+import {encode} from 'base64-arraybuffer';
+
 import type {int} from './Trie';
 
 /**
@@ -462,7 +464,7 @@ export class TrieBuilder {
             allIndexesLength = this.index2Length;
         }
         if (valueBits === BITS_16) {
-           // dataMove = allIndexesLength;
+            // dataMove = allIndexesLength;
             dataMove = 0;
         } else {
             dataMove = 0;
@@ -480,9 +482,6 @@ export class TrieBuilder {
         ) {
             throw new Error('Trie data is too large.');
         }
-        /* calculate the sizes of, and allocate, the index and data arrays */
-        let indexLength =
-            valueBits === BITS_16 ? allIndexesLength + this.dataLength : allIndexesLength;
 
         const index = new Uint16Array(allIndexesLength);
 
@@ -1010,3 +1009,33 @@ export class TrieBuilder {
         return newBlock;
     }
 }
+
+export const serializeBase64 = (trie: Trie): string => {
+    const headerLength = Uint32Array.BYTES_PER_ELEMENT * 6;
+    const bufferLength = headerLength + trie.index.byteLength + trie.data.byteLength;
+    const buffer = new ArrayBuffer(Math.ceil(bufferLength / 4) * 4);
+    const view32 = new Uint32Array(buffer);
+    const view16 = new Uint16Array(buffer);
+    view32[0] = trie.initialValue;
+    view32[1] = trie.errorValue;
+    view32[2] = trie.highStart;
+    view32[3] = trie.highValueIndex;
+    view32[4] = trie.index.byteLength;
+    // $FlowFixMe
+    view32[5] = trie.data.BYTES_PER_ELEMENT;
+
+    view16.set(trie.index, headerLength / Uint16Array.BYTES_PER_ELEMENT);
+    if (trie.data.BYTES_PER_ELEMENT === Uint16Array.BYTES_PER_ELEMENT) {
+        view16.set(
+            trie.data,
+            (headerLength + trie.index.byteLength) / Uint16Array.BYTES_PER_ELEMENT
+        );
+    } else {
+        view32.set(
+            trie.data,
+            Math.ceil((headerLength + trie.index.byteLength) / Uint32Array.BYTES_PER_ELEMENT)
+        );
+    }
+
+    return encode(buffer);
+};

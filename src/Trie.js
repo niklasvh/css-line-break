@@ -1,6 +1,8 @@
 /* @flow */
 'use strict';
 
+import {decode} from 'base64-arraybuffer';
+
 export type int = number;
 
 /** Shift size for getting the index-2 table offset. */
@@ -71,21 +73,39 @@ export const UTRIE2_INDEX_2_BLOCK_LENGTH = 1 << UTRIE2_SHIFT_1_2;
 /** Mask for getting the lower bits for the in-index-2-block offset. */
 export const UTRIE2_INDEX_2_MASK = UTRIE2_INDEX_2_BLOCK_LENGTH - 1;
 
+export const createTrieFromBase64 = (base64: string): Trie => {
+    const buffer = decode(base64);
+    const view32 = new Uint32Array(buffer);
+    const view16 = new Uint16Array(buffer);
+    const headerLength = 24;
+
+    const index = view16.slice(
+        headerLength / Uint16Array.BYTES_PER_ELEMENT,
+        view32[4] / Uint16Array.BYTES_PER_ELEMENT
+    );
+    const data =
+        view32[5] === Uint16Array.BYTES_PER_ELEMENT
+            ? view16.slice((headerLength + view32[4]) / Uint16Array.BYTES_PER_ELEMENT)
+            : view32.slice(Math.ceil((headerLength + view32[4]) / Uint32Array.BYTES_PER_ELEMENT));
+
+    return new Trie(view32[0], view32[1], view32[2], view32[3], index, data);
+};
+
 export class Trie {
     initialValue: int;
     errorValue: int;
     highStart: int;
     highValueIndex: int;
-    data: Array<int> | Uint32Array | Uint16Array;
-    index: Array<int> | Uint16Array;
+    index: Uint16Array;
+    data: Uint32Array | Uint16Array;
 
     constructor(
         initialValue: int,
         errorValue: int,
         highStart: int,
         highValueIndex: int,
-        index: Array<int> | Uint16Array,
-        data: Array<int> | Uint32Array | Uint16Array
+        index: Uint16Array,
+        data: Uint32Array | Uint16Array
     ) {
         this.initialValue = initialValue;
         this.errorValue = errorValue;
