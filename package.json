@@ -9,6 +9,7 @@
     "format": "prettier --single-quote --no-bracket-spacing --tab-width 4 --print-width 100 --write \"{src,www,tests,scripts}/**/*.js\"",
     "flow": "flow",
     "lint": "eslint src/**",
+    "mocha": "mocha --require babel-core/register tests/*.js",
     "test": "npm run flow && npm run lint"
   },
   "repository": {
@@ -33,7 +34,8 @@
     "eslint": "4.2.0",
     "eslint-plugin-flowtype": "2.35.0",
     "eslint-plugin-prettier": "2.1.2",
-    "flow-bin": "^0.61.0",
+    "flow-bin": "0.61.0",
+    "mocha": "4.0.1",
     "prettier": "1.9.2",
     "rimraf": "2.6.1"
   },
