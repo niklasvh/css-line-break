@@ -6,11 +6,13 @@
   "scripts": {
     "build": "rimraf dist/ && npm run build:npm",
     "build:npm": "babel src/ -d dist/ --plugins=dev-expression,transform-es2015-modules-commonjs",
-    "format": "prettier --single-quote --no-bracket-spacing --tab-width 4 --print-width 100 --write \"{src,www,tests,scripts}/**/*.js\"",
+    "format": "prettier --single-quote --no-bracket-spacing --tab-width 4 --print-width 100 --write \"{src,scripts}/**/*.js\"",
     "flow": "flow",
     "lint": "eslint src/**",
+    "generate-trie": "babel-node scripts/generate_line_break_trie.js",
+    "generate-tests": "babel-node scripts/generate_line_break_tests.js",
     "mocha": "mocha --require babel-core/register tests/*.js",
-    "test": "npm run flow && npm run lint"
+    "test": "npm run flow && npm run lint && npm run mocha"
   },
   "repository": {
     "type": "git",
