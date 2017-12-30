@@ -5,6 +5,7 @@ dist: trusty
 sudo: false
 script:
 - npm run build
+- travis_wait 60 npm test
 deploy:
   provider: npm
   email: niklasvh@gmail.com
