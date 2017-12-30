@@ -4,5 +4,14 @@ node_js:
 dist: trusty
 sudo: false
 script:
-  - npm run build
-  - travis_wait 30 npm test
+- npm run build
+deploy:
+  provider: npm
+  email: niklasvh@gmail.com
+  skip_cleanup: true
+  api_key:
+    secure: jfxPeaYNIur6hfZ71y46z2TvUkqHjGY0Ilw9DNkViUTZ9ZtwjG5R5eda1I/ofGpQuMr6/X3Gii/KExWkyhqM+CpmlF5xzj3YQI7PdvsvQEf2tKYCAD6SANITj6cpbjjv6H2EfLlmNo2vr5PU+r2wYAIwzilRmj5lIRWuX8RREusyay7BQJ3h4All2MZJYU7QHw2xhlBnQHRSQPjdzRTKEl5PqkIKa1ALLQ8AAqe5TAl6QGsSS4aG1MgVyrv+4AT33FAejgah9NZqoi8cF4RXiclYNJeeixIwhuRaKuR470dmhTGlQGxmG53NgCOcF3xyXO5Hfkwm7xDcnx+wKxAe5yUoIHxuwVh0oxNkQ1/qtlltLJsIkmAxi6cV/IcIN1n/AQrPfutxUSjlHGGxVKnvjuIZ6QXyhfVdg6k0Vhfx4x6HifI8Rq3sdPTEc4I3cLvJoy783ax28K88j4iSi3m4uEp1sCtuSX2aopYumyHE8Zb0O9zg6HlArIJdFh5UYm4HqFqm38FnvDWsyigI+P5SJwDy1DMK6wnVwpL9U72AiSzOj7Ncj4x3A9fPss5agesfnAZyHu76zzSFqsPMfdoVfgwmPFf7yaAjGw6ruGE87HNCWlk7l/9DNp7dfzlv2xtn7Z1W4/oKZLqLiqQyUv0GcBeKzrgrIma4g1816xB31OE=
+  on:
+    tags: true
+    branch: master
+    repo: niklasvh/css-line-break

@@ -18,11 +18,19 @@ defined in [CSS Text Module Level 3](https://www.w3.org/TR/css-text-3/#line-brea
 You can install the module via npm:
 
     npm install css-line-break
+  
+### Usage
+The `LineBreaker` creates an [iterator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators) that returns `Break`s for a given text.
+
+    LineBreaker(text, [options]);
     
 ### Example
     import {LineBreaker} from 'css-line-break';
     
-    const breaker = LineBreaker('Lorem ipsum lol.');
+    const breaker = LineBreaker('Lorem ipsum lol.', {
+        lineBreak: 'strict',
+        wordBreak: 'break-word'
+    });
 
     const words = [];
     let bk;
@@ -32,3 +40,20 @@ You can install the module via npm:
     }
 
     assert.deepEqual(words, ['Lorem ', 'ipsum ', 'lol.']);
+    
+### Options
+The following parameters are available for the options:
+
+ - `lineBreak`: `normal` | `strict`
+ - `wordBreak`: `normal` | `break-all` | `break-word` | `keep-all`
+ 
+For more information how they affect the line breaking algorithms, 
+check out [CSS Text Module Level 3](https://www.w3.org/TR/css-text-3/#line-breaking).
+
+### Testing
+You can run the test suite with:
+
+    npm test
+
+The library implements all the [LineBreakTest.txt tests](http://www.unicode.org/Public/10.0.0/ucd/auxiliary/LineBreakTest.txt) 
+ and a number of CSS web-platform-tests.
