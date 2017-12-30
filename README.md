@@ -1,5 +1,10 @@
 css-line-break
 ==============
+
+[![Build Status](https://travis-ci.org/niklasvh/css-line-break.svg)](https://travis-ci.org/niklasvh/css-line-break)
+[![NPM Downloads](https://img.shields.io/npm/dm/css-line-break.svg)](https://www.npmjs.org/package/css-line-break)
+[![NPM Version](https://img.shields.io/npm/v/css-line-break.svg)](https://www.npmjs.org/package/css-line-break)
+
 A JavaScript library for Line Breaking and identifying Word Boundaries, 
 [implementing the Unicode Line Breaking Algorithm (UAX #14)](http://unicode.org/reports/tr14/)  
 
