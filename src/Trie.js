@@ -1,7 +1,7 @@
 /* @flow */
 'use strict';
 
-import {decode} from 'base64-arraybuffer';
+import {decode, polyUint16Array, polyUint32Array} from './Util';
 
 export type int = number;
 
@@ -75,18 +75,15 @@ export const UTRIE2_INDEX_2_MASK = UTRIE2_INDEX_2_BLOCK_LENGTH - 1;
 
 export const createTrieFromBase64 = (base64: string): Trie => {
     const buffer = decode(base64);
-    const view32 = new Uint32Array(buffer);
-    const view16 = new Uint16Array(buffer);
+    const view32 = Array.isArray(buffer) ? polyUint32Array(buffer) : new Uint32Array(buffer);
+    const view16 = Array.isArray(buffer) ? polyUint16Array(buffer) : new Uint16Array(buffer);
     const headerLength = 24;
 
-    const index = view16.slice(
-        headerLength / Uint16Array.BYTES_PER_ELEMENT,
-        view32[4] / Uint16Array.BYTES_PER_ELEMENT
-    );
+    const index = view16.slice(headerLength / 2, view32[4] / 2);
     const data =
-        view32[5] === Uint16Array.BYTES_PER_ELEMENT
-            ? view16.slice((headerLength + view32[4]) / Uint16Array.BYTES_PER_ELEMENT)
-            : view32.slice(Math.ceil((headerLength + view32[4]) / Uint32Array.BYTES_PER_ELEMENT));
+        view32[5] === 2
+            ? view16.slice((headerLength + view32[4]) / 2)
+            : view32.slice(Math.ceil((headerLength + view32[4]) / 4));
 
     return new Trie(view32[0], view32[1], view32[2], view32[3], index, data);
 };
@@ -96,16 +93,16 @@ export class Trie {
     errorValue: int;
     highStart: int;
     highValueIndex: int;
-    index: Uint16Array;
-    data: Uint32Array | Uint16Array;
+    index: Uint16Array | Array<number>;
+    data: Uint32Array | Uint16Array | Array<number>;
 
     constructor(
         initialValue: int,
         errorValue: int,
         highStart: int,
         highValueIndex: int,
-        index: Uint16Array,
-        data: Uint32Array | Uint16Array
+        index: Uint16Array | Array<number>,
+        data: Uint32Array | Uint16Array | Array<number>
     ) {
         this.initialValue = initialValue;
         this.errorValue = errorValue;

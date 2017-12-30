@@ -1011,8 +1011,16 @@ export class TrieBuilder {
 }
 
 export const serializeBase64 = (trie: Trie): string => {
+    const index = trie.index;
+    const data = trie.data;
+    if (
+        !(index instanceof Uint16Array) ||
+        !(data instanceof Uint16Array || data instanceof Uint32Array)
+    ) {
+        throw new Error('TrieBuilder serializer only support TypedArrays');
+    }
     const headerLength = Uint32Array.BYTES_PER_ELEMENT * 6;
-    const bufferLength = headerLength + trie.index.byteLength + trie.data.byteLength;
+    const bufferLength = headerLength + index.byteLength + data.byteLength;
     const buffer = new ArrayBuffer(Math.ceil(bufferLength / 4) * 4);
     const view32 = new Uint32Array(buffer);
     const view16 = new Uint16Array(buffer);
@@ -1020,20 +1028,17 @@ export const serializeBase64 = (trie: Trie): string => {
     view32[1] = trie.errorValue;
     view32[2] = trie.highStart;
     view32[3] = trie.highValueIndex;
-    view32[4] = trie.index.byteLength;
+    view32[4] = index.byteLength;
     // $FlowFixMe
-    view32[5] = trie.data.BYTES_PER_ELEMENT;
+    view32[5] = data.BYTES_PER_ELEMENT;
 
-    view16.set(trie.index, headerLength / Uint16Array.BYTES_PER_ELEMENT);
-    if (trie.data.BYTES_PER_ELEMENT === Uint16Array.BYTES_PER_ELEMENT) {
-        view16.set(
-            trie.data,
-            (headerLength + trie.index.byteLength) / Uint16Array.BYTES_PER_ELEMENT
-        );
+    view16.set(index, headerLength / Uint16Array.BYTES_PER_ELEMENT);
+    if (data.BYTES_PER_ELEMENT === Uint16Array.BYTES_PER_ELEMENT) {
+        view16.set(data, (headerLength + index.byteLength) / Uint16Array.BYTES_PER_ELEMENT);
     } else {
         view32.set(
-            trie.data,
-            Math.ceil((headerLength + trie.index.byteLength) / Uint32Array.BYTES_PER_ELEMENT)
+            data,
+            Math.ceil((headerLength + index.byteLength) / Uint32Array.BYTES_PER_ELEMENT)
         );
     }
 
