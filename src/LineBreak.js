@@ -3,6 +3,9 @@
 
 import {createTrieFromBase64} from './Trie';
 import base64 from './linebreak-trie';
+import {fromCodePoint, toCodePoints} from './Util';
+
+export const LETTER_NUMBER_MODIFIER = 50;
 
 // Non-tailorable Line Breaking Classes
 const BK = 1; //  Cause a line break (after)
@@ -115,11 +118,18 @@ const HYPHEN = [HY, BA];
 export const codePointsToCharacterClasses = (
     codePoints: Array<number>,
     strict: boolean = true
-): [Array<number>, Array<number>] => {
+): [Array<number>, Array<number>, Array<boolean>] => {
     const types = [];
     const indicies = [];
+    const categories = [];
     codePoints.forEach((codePoint, index) => {
-        const classType = UnicodeTrie.get(codePoint);
+        let classType = UnicodeTrie.get(codePoint);
+        if (classType > LETTER_NUMBER_MODIFIER) {
+            categories.push(true);
+            classType -= LETTER_NUMBER_MODIFIER;
+        } else {
+            categories.push(false);
+        }
         if (classType === CM || classType === ZWJ) {
             // LB10 Treat any remaining combining mark or ZWJ as AL.
             if (index === 0) {
@@ -169,7 +179,7 @@ export const codePointsToCharacterClasses = (
         types.push(classType);
     });
 
-    return [indicies, types];
+    return [indicies, types, categories];
 };
 
 const isAdjacentWithSpaceIgnored = (
@@ -239,23 +249,22 @@ const previousNonSpaceClassType = (currentIndex: number, classTypes: Array<numbe
     return 0;
 };
 
-export const lineBreakAtIndex = (codePoints: Array<number>, index: number) => {
-    // LB2 Never break at the start of text.
-    if (index === 0) {
-        return BREAK_NOT_ALLOWED;
-    }
-
-    // LB3 Always break at the end of text.
-    if (index >= codePoints.length) {
-        return BREAK_MANDATORY;
-    }
-
-    const [indicies, classTypes] = codePointsToCharacterClasses(codePoints);
+const _lineBreakAtIndex = (
+    codePoints: Array<number>,
+    classTypes: Array<number>,
+    indicies: Array<number>,
+    index: number,
+    forbiddenBreaks: ?Array<boolean>
+) => {
     if (indicies[index] === 0) {
         return BREAK_NOT_ALLOWED;
     }
 
     let currentIndex = index - 1;
+    if (Array.isArray(forbiddenBreaks) && forbiddenBreaks[currentIndex] === true) {
+        return BREAK_NOT_ALLOWED;
+    }
+
     let beforeIndex = currentIndex - 1;
     let afterIndex = currentIndex + 1;
     let current = classTypes[currentIndex];
@@ -498,4 +507,59 @@ export const lineBreakAtIndex = (codePoints: Array<number>, index: number) => {
     }
 
     return BREAK_ALLOWED;
+};
+
+export const lineBreakAtIndex = (codePoints: Array<number>, index: number) => {
+    // LB2 Never break at the start of text.
+    if (index === 0) {
+        return BREAK_NOT_ALLOWED;
+    }
+
+    // LB3 Always break at the end of text.
+    if (index >= codePoints.length) {
+        return BREAK_MANDATORY;
+    }
+
+    const [indicies, classTypes] = codePointsToCharacterClasses(codePoints);
+
+    return _lineBreakAtIndex(codePoints, classTypes, indicies, index);
+};
+
+type LINE_BREAK = 'auto' | 'normal' | 'strict';
+type WORD_BREAK = 'normal' | 'break-all' | 'break-word' | 'keep-all';
+
+export type Options = {
+    lineBreak: ?LINE_BREAK,
+    wordBreak: ?WORD_BREAK
+};
+
+export const inlineBreakOpportunities = (
+    str: string,
+    options: Options = {lineBreak: 'normal', wordBreak: 'normal'}
+): string => {
+    const codePoints = toCodePoints(str);
+    let output = BREAK_NOT_ALLOWED;
+    const strict = options.lineBreak !== 'normal' && options.lineBreak !== 'auto';
+    let [indicies, classTypes, isLetterNumber] = codePointsToCharacterClasses(codePoints, strict);
+
+    if (options.wordBreak === 'break-all' || options.wordBreak === 'break-word') {
+        classTypes = classTypes.map(type => ([NU, AL, SA].indexOf(type) !== -1 ? ID : type));
+    }
+
+    const forbiddenBreakpoints =
+        options.wordBreak === 'keep-all'
+            ? isLetterNumber.map((isLetterNumber, i) => {
+                  return isLetterNumber && codePoints[i] >= 0x4e00 && codePoints[i] <= 0x9fff;
+              })
+            : null;
+
+    codePoints.forEach((codePoint, i) => {
+        output +=
+            fromCodePoint(codePoint) +
+            (i >= codePoints.length - 1
+                ? BREAK_MANDATORY
+                : _lineBreakAtIndex(codePoints, classTypes, indicies, i + 1, forbiddenBreakpoints));
+    });
+
+    return output;
 };

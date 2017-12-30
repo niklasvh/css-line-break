@@ -1,5 +1,5 @@
 {
-  "name": "white-space",
+  "name": "css-line-break",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -8,7 +8,7 @@
     "build:npm": "babel src/ -d dist/ --plugins=dev-expression,transform-es2015-modules-commonjs",
     "format": "prettier --single-quote --no-bracket-spacing --tab-width 4 --print-width 100 --write \"{src,scripts}/**/*.js\"",
     "flow": "flow",
-    "lint": "eslint src/**",
+    "lint": "eslint src/**/*.js",
     "generate-trie": "babel-node scripts/generate_line_break_trie.js",
     "generate-tests": "babel-node scripts/generate_line_break_tests.js",
     "mocha": "mocha --require babel-core/register tests/*.js",
