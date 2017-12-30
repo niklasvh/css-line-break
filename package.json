@@ -16,13 +16,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/niklasvh/white-space.git"
+    "url": "git+ssh://git@github.com/niklasvh/css-line-break.git"
   },
   "keywords": [
     "white-space",
+    "line-break",
     "word-break",
-    "word-break"
+    "word-wrap",
+    "overflow-wrap"
   ],
+  "dependencies": {
+    "base64-arraybuffer": "^0.1.5"
+  },
   "devDependencies": {
     "babel-cli": "6.24.1",
     "babel-core": "6.25.0",
@@ -49,7 +54,7 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/niklasvh/white-space/issues"
+    "url": "https://github.com/niklasvh/css-line-break/issues"
   },
-  "homepage": "https://github.com/niklasvh/white-space#readme"
+  "homepage": "https://github.com/niklasvh/css-line-break#readme"
 }

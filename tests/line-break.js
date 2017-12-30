@@ -239,6 +239,24 @@ describe('CSS line-break', () => {
     });
     describe('line-break: normal', () => {
         const lineBreak = 'normal';
+        describe('breaks before hyphens', () => {
+            it('HYPHEN (U+2010)', () => {
+                test('×サ÷ン÷プ÷ル÷文÷サ÷ン÷プ÷ル÷文÷‐÷サ÷ン÷プ÷ル÷文!', lineBreak);
+            });
+
+            it('ENDASH (U+2013)', () => {
+                test('×サ÷ン÷プ÷ル÷文÷サ÷ン÷プ÷ル÷文÷–÷サ÷ン÷プ÷ル÷文!', lineBreak);
+            });
+
+            it('〜', () => {
+                test('×サ÷ン÷プ÷ル÷文÷サ÷ン÷プ÷ル÷文÷〜÷サ÷ン÷プ÷ル÷文!', lineBreak);
+            });
+
+            it('゠', () => {
+                test('×サ÷ン÷プ÷ル÷文÷サ÷ン÷プ÷ル÷文÷゠÷サ÷ン÷プ÷ル÷文!', lineBreak);
+            });
+        });
+
         describe('line-break-normal-021.xht', () => {
             it('々', () => {
                 test('×サ÷ン÷プ÷ル÷文÷サ÷ン÷プ÷ル÷文×々÷サ÷ン÷プ÷ル÷文!', lineBreak);
