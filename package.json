@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rimraf dist/ && npm run build:npm",
-    "build:npm": "babel src/ -d dist/ --plugins=dev-expression,transform-es2015-modules-commonjs",
+    "build:npm": "babel src/ -d dist/ --plugins=dev-expression,transform-es2015-modules-commonjs && webpack",
     "format": "prettier --single-quote --no-bracket-spacing --tab-width 4 --print-width 100 --write \"{src,scripts}/**/*.js\"",
     "flow": "flow",
     "lint": "eslint src/**/*.js",
@@ -45,7 +45,9 @@
     "flow-bin": "0.61.0",
     "mocha": "4.0.1",
     "prettier": "1.9.2",
-    "rimraf": "2.6.1"
+    "rimraf": "2.6.1",
+    "uglifyjs-webpack-plugin": "^1.1.8",
+    "webpack": "^3.10.0"
   },
   "author": {
     "name": "Niklas von Hertzen",
