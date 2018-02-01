@@ -5,8 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rimraf dist/ && npm run build:npm",
-    "build:npm": "babel src/ -d dist/ --plugins=dev-expression,transform-es2015-modules-commonjs",
-    "package": "webpack",
+    "build:npm": "babel src/ -d dist/ --plugins=dev-expression,transform-es2015-modules-commonjs && webpack",
     "format": "prettier --single-quote --no-bracket-spacing --tab-width 4 --print-width 100 --write \"{src,scripts}/**/*.js\"",
     "flow": "flow",
     "lint": "eslint src/**/*.js",
