@@ -75,6 +75,16 @@ export const UTRIE2_INDEX_2_MASK = UTRIE2_INDEX_2_BLOCK_LENGTH - 1;
 
 export const createTrieFromBase64 = (base64: string): Trie => {
     const buffer = decode(base64);
+    if (!Uint16Array.prototype.slice) {
+        Uint16Array.prototype.slice = function slice (start, end) {
+            return new Uint16Array(Array.prototype.slice.call(this, start, end))
+        }
+    }
+    if (!Uint32Array.prototype.slice) {
+        Uint32Array.prototype.slice = function slice (start, end) {
+            return new Uint32Array(Array.prototype.slice.call(this, start, end))
+        }
+    }
     const view32 = Array.isArray(buffer) ? polyUint32Array(buffer) : new Uint32Array(buffer);
     const view16 = Array.isArray(buffer) ? polyUint16Array(buffer) : new Uint16Array(buffer);
     const headerLength = 24;
