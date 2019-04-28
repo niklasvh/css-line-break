@@ -1,17 +1,14 @@
-/* @flow */
-'use strict';
-
-import fs from 'fs';
-import path from 'path';
+import {writeFileSync, readFileSync} from 'fs';
+import {resolve} from 'path';
 import {classes, LETTER_NUMBER_MODIFIER} from '../src/LineBreak';
 import {TrieBuilder, serializeBase64} from '../src/TrieBuilder';
 
-const rawData = fs.readFileSync(path.resolve(__dirname, '../src/LineBreak.txt')).toString();
+const rawData = readFileSync(resolve(__dirname, '../src/LineBreak.txt')).toString();
 const builder = new TrieBuilder(classes.XX);
 
-let rangeStart = null;
-let rangeEnd = null;
-let rangeType = null;
+let rangeStart: number | null = null;
+let rangeEnd: number | null = null;
+let rangeType: number | null = null;
 
 rawData
     .split('\n')
@@ -26,7 +23,7 @@ rawData
                       .substring(index + 1)
                       .trim()
                       .split(/\s+/)[0]
-                      .trim()
+                      .trim(),
               ];
     })
     .filter(([s]) => s.length > 0)
@@ -34,10 +31,8 @@ rawData
         const [input, type] = s.split(';');
         const [start, end] = input.split('..');
         const categoryType =
-            ['Lu', 'Ll', 'Lt', 'Lm', 'Lo', 'Nd', 'Nl', 'No'].indexOf(category) !== -1
-                ? LETTER_NUMBER_MODIFIER
-                : 0;
-        const classType = classes[type] + categoryType;
+            ['Lu', 'Ll', 'Lt', 'Lm', 'Lo', 'Nd', 'Nl', 'No'].indexOf(category) !== -1 ? LETTER_NUMBER_MODIFIER : 0;
+        const classType: number = classes[type] + categoryType;
         if (!classType) {
             console.error(`Invalid class type "${type}" found`);
             process.exit(1);
@@ -62,8 +57,5 @@ rawData
     });
 
 const base64 = serializeBase64(builder.freeze(16));
-fs.writeFileSync(
-    path.resolve(__dirname, '../src/linebreak-trie.js'),
-    `module.exports = "${base64}";`
-);
-console.log(base64, base64.length);
+writeFileSync(resolve(__dirname, '../src/linebreak-trie.ts'), `export const base64 = "${base64}";`);
+console.log(`Trie created successfully`);

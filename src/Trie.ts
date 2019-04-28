@@ -1,6 +1,3 @@
-/* @flow */
-'use strict';
-
 import {decode, polyUint16Array, polyUint32Array} from './Util';
 
 export type int = number;
@@ -46,8 +43,7 @@ export const UTRIE2_INDEX_2_BMP_LENGTH = UTRIE2_LSCP_INDEX_2_OFFSET + UTRIE2_LSC
  * Length 32=0x20 for lead bytes C0..DF, regardless of UTRIE2_SHIFT_2.
  */
 export const UTRIE2_UTF8_2B_INDEX_2_OFFSET = UTRIE2_INDEX_2_BMP_LENGTH;
-export const UTRIE2_UTF8_2B_INDEX_2_LENGTH =
-    0x800 >> 6; /* U+0800 is the first code point after 2-byte UTF-8 */
+export const UTRIE2_UTF8_2B_INDEX_2_LENGTH = 0x800 >> 6; /* U+0800 is the first code point after 2-byte UTF-8 */
 /**
  * The index-1 table, only used for supplementary code points, at offset 2112=0x840.
  * Variable length, for code points up to highStart, where the last single-value range starts.
@@ -93,16 +89,16 @@ export class Trie {
     errorValue: int;
     highStart: int;
     highValueIndex: int;
-    index: Uint16Array | Array<number>;
-    data: Uint32Array | Uint16Array | Array<number>;
+    index: Uint16Array | number[];
+    data: Uint32Array | Uint16Array | number[];
 
     constructor(
         initialValue: int,
         errorValue: int,
         highStart: int,
         highValueIndex: int,
-        index: Uint16Array | Array<number>,
-        data: Uint32Array | Uint16Array | Array<number>
+        index: Uint16Array | number[],
+        data: Uint32Array | Uint16Array | number[]
     ) {
         this.initialValue = initialValue;
         this.errorValue = errorValue;
@@ -137,19 +133,14 @@ export class Trie {
                 //   For this function, we need the code point data.
                 // Note: this expression could be refactored for slightly improved efficiency, but
                 //       surrogate code points will be so rare in practice that it's not worth it.
-                ix = this.index[
-                    UTRIE2_LSCP_INDEX_2_OFFSET + ((codePoint - 0xd800) >> UTRIE2_SHIFT_2)
-                ];
+                ix = this.index[UTRIE2_LSCP_INDEX_2_OFFSET + ((codePoint - 0xd800) >> UTRIE2_SHIFT_2)];
                 ix = (ix << UTRIE2_INDEX_SHIFT) + (codePoint & UTRIE2_DATA_MASK);
                 return this.data[ix];
             }
 
             if (codePoint < this.highStart) {
                 // Supplemental code point, use two-level lookup.
-                ix =
-                    UTRIE2_INDEX_1_OFFSET -
-                    UTRIE2_OMITTED_BMP_INDEX_1_LENGTH +
-                    (codePoint >> UTRIE2_SHIFT_1);
+                ix = UTRIE2_INDEX_1_OFFSET - UTRIE2_OMITTED_BMP_INDEX_1_LENGTH + (codePoint >> UTRIE2_SHIFT_1);
                 ix = this.index[ix];
                 ix += (codePoint >> UTRIE2_SHIFT_2) & UTRIE2_INDEX_2_MASK;
                 ix = this.index[ix];

@@ -1,6 +1,3 @@
-/* @flow */
-'use strict';
-
 import {
     UTRIE2_SHIFT_2,
     UTRIE2_INDEX_SHIFT,
@@ -16,12 +13,11 @@ import {
     UTRIE2_INDEX_2_BLOCK_LENGTH,
     UTRIE2_INDEX_2_MASK,
     UTRIE2_SHIFT_1_2,
-    Trie
+    Trie,
+    int
 } from './Trie';
 
 import {encode} from 'base64-arraybuffer';
-
-import type {int} from './Trie';
 
 /**
  * Trie2 constants, defining shift widths, index array lengths, etc.
@@ -29,7 +25,7 @@ import type {int} from './Trie';
  * These are needed for the runtime macros but users can treat these as
  * implementation details and skip to the actual public API further below.
  */
-const UTRIE2_OPTIONS_VALUE_BITS_MASK = 0x000f;
+// const UTRIE2_OPTIONS_VALUE_BITS_MASK = 0x000f;
 
 /** Number of code points per index-1 table entry. 2048=0x800 */
 const UTRIE2_CP_PER_INDEX_1_ENTRY = 1 << UTRIE2_SHIFT_1;
@@ -69,8 +65,7 @@ const UTRIE2_DATA_START_OFFSET = 0xc0;
  */
 const UNEWTRIE2_INDEX_GAP_OFFSET = UTRIE2_INDEX_2_BMP_LENGTH;
 const UNEWTRIE2_INDEX_GAP_LENGTH =
-    (UTRIE2_UTF8_2B_INDEX_2_LENGTH + UTRIE2_MAX_INDEX_1_LENGTH + UTRIE2_INDEX_2_MASK) &
-    ~UTRIE2_INDEX_2_MASK;
+    (UTRIE2_UTF8_2B_INDEX_2_LENGTH + UTRIE2_MAX_INDEX_1_LENGTH + UTRIE2_INDEX_2_MASK) & ~UTRIE2_INDEX_2_MASK;
 /**
  * Maximum length of the build-time index-2 array.
  * Maximum number of Unicode code points (0x110000) shifted right by UTRIE2_SHIFT_2,
@@ -135,7 +130,7 @@ export const BITS_32 = 32;
 
 const isHighSurrogate = (c: int): boolean => c >= 0xd800 && c <= 0xdbff;
 
-const equal_int = (a: Uint32Array, s: int, t: int, length: int): boolean => {
+const equalInt = (a: Uint32Array, s: int, t: int, length: int): boolean => {
     for (let i = 0; i < length; i++) {
         if (a[s + i] !== a[t + i]) {
             return false;
@@ -224,11 +219,7 @@ export class TrieBuilder {
          * Plus as many as needed for lead surrogate code points.
          */
         /* i==newTrie->dataNullOffset */
-        this.map[i++] =
-            (0x110000 >> UTRIE2_SHIFT_2) -
-            (0x80 >> UTRIE2_SHIFT_2) +
-            1 +
-            UTRIE2_LSCP_INDEX_2_LENGTH;
+        this.map[i++] = (0x110000 >> UTRIE2_SHIFT_2) - (0x80 >> UTRIE2_SHIFT_2) + 1 + UTRIE2_LSCP_INDEX_2_LENGTH;
         j += UTRIE2_DATA_BLOCK_LENGTH;
         for (; j < UNEWTRIE2_DATA_START_OFFSET; ++i, j += UTRIE2_DATA_BLOCK_LENGTH) {
             this.map[i] = 0;
@@ -254,11 +245,7 @@ export class TrieBuilder {
         this.index2NullOffset = UNEWTRIE2_INDEX_2_NULL_OFFSET;
         this.index2Length = UNEWTRIE2_INDEX_2_START_OFFSET;
         /* set the index-1 indexes for the linear index-2 block */
-        for (
-            i = 0, j = 0;
-            i < UTRIE2_OMITTED_BMP_INDEX_1_LENGTH;
-            ++i, j += UTRIE2_INDEX_2_BLOCK_LENGTH
-        ) {
+        for (i = 0, j = 0; i < UTRIE2_OMITTED_BMP_INDEX_1_LENGTH; ++i, j += UTRIE2_INDEX_2_BLOCK_LENGTH) {
             this.index1[i] = j;
         }
         /* set the remaining index-1 indexes to the null index-2 block */
@@ -299,7 +286,7 @@ export class TrieBuilder {
      * @param value the value
      * @param overwrite flag for whether old non-initial values are to be overwritten
      */
-    setRange(start: int, end: int, value: int, overwrite: boolean): TrieBuilder {
+    setRange(start: int, end: int, value: int, overwrite: boolean = false): TrieBuilder {
         /*
      * repeat value in [start..end]
      * mark index values for repeat-data blocks by setting bit 31 of the index values
@@ -319,7 +306,7 @@ export class TrieBuilder {
         if ((start & UTRIE2_DATA_MASK) !== 0) {
             /* set partial block at [start..following block boundary[ */
             block = this.getDataBlock(start, true);
-            let nextStart = (start + UTRIE2_DATA_BLOCK_LENGTH) & ~UTRIE2_DATA_MASK;
+            const nextStart = (start + UTRIE2_DATA_BLOCK_LENGTH) & ~UTRIE2_DATA_MASK;
             if (nextStart <= limit) {
                 this.fillBlock(
                     block,
@@ -347,11 +334,8 @@ export class TrieBuilder {
         /* round down limit to a block boundary */
         limit &= ~UTRIE2_DATA_MASK;
         /* iterate over all-value blocks */
-        if (value === this.initialValue) {
-            repeatBlock = this.dataNullOffset;
-        } else {
-            repeatBlock = -1;
-        }
+        repeatBlock = value === this.initialValue ? this.dataNullOffset : -1;
+
         while (start < limit) {
             let i2;
             let setRepeatBlock = false;
@@ -374,14 +358,7 @@ export class TrieBuilder {
                     setRepeatBlock = true;
                 } else {
                     /* !overwrite, or protected block: just write the values into this block */
-                    this.fillBlock(
-                        block,
-                        0,
-                        UTRIE2_DATA_BLOCK_LENGTH,
-                        value,
-                        this.initialValue,
-                        overwrite
-                    );
+                    this.fillBlock(block, 0, UTRIE2_DATA_BLOCK_LENGTH, value, this.initialValue, overwrite);
                 }
             } else if (this.data[block] !== value && (overwrite || block === this.dataNullOffset)) {
                 /*
@@ -458,11 +435,9 @@ export class TrieBuilder {
         if (!this.isCompacted) {
             this.compactTrie();
         }
-        if (this.highStart <= 0x10000) {
-            allIndexesLength = UTRIE2_INDEX_1_OFFSET;
-        } else {
-            allIndexesLength = this.index2Length;
-        }
+
+        allIndexesLength = this.highStart <= 0x10000 ? UTRIE2_INDEX_1_OFFSET : this.index2Length;
+
         if (valueBits === BITS_16) {
             // dataMove = allIndexesLength;
             dataMove = 0;
@@ -501,15 +476,11 @@ export class TrieBuilder {
         }
 
         if (this.highStart > 0x10000) {
-            let index1Length = (this.highStart - 0x10000) >> UTRIE2_SHIFT_1;
-            let index2Offset =
-                UTRIE2_INDEX_2_BMP_LENGTH + UTRIE2_UTF8_2B_INDEX_2_LENGTH + index1Length;
+            const index1Length = (this.highStart - 0x10000) >> UTRIE2_SHIFT_1;
+            const index2Offset = UTRIE2_INDEX_2_BMP_LENGTH + UTRIE2_UTF8_2B_INDEX_2_LENGTH + index1Length;
             /* write 16-bit index-1 values for supplementary code points */
-            //p=(uint32_t *)newTrie->index1+UTRIE2_OMITTED_BMP_INDEX_1_LENGTH;
             for (i = 0; i < index1Length; i++) {
-                //*dest16++=(uint16_t)(UTRIE2_INDEX_2_OFFSET + *p++);
-                index[destIdx++] =
-                    UTRIE2_INDEX_2_OFFSET + this.index1[i + UTRIE2_OMITTED_BMP_INDEX_1_LENGTH];
+                index[destIdx++] = UTRIE2_INDEX_2_OFFSET + this.index1[i + UTRIE2_OMITTED_BMP_INDEX_1_LENGTH];
             }
 
             /*
@@ -683,7 +654,7 @@ export class TrieBuilder {
             /* look for maximum overlap (modulo granularity) with the previous, adjacent block */
             for (
                 overlap = blockLength - UTRIE2_DATA_GRANULARITY;
-                overlap > 0 && !equal_int(this.data, newStart - overlap, start, overlap);
+                overlap > 0 && !equalInt(this.data, newStart - overlap, start, overlap);
                 overlap -= UTRIE2_DATA_GRANULARITY
             ) {}
             if (overlap > 0 || newStart < start) {
@@ -699,11 +670,8 @@ export class TrieBuilder {
                     this.data[newStart++] = this.data[start++];
                 }
             } else {
-                /* no overlap && newStart==start */ for (
-                    i = blockCount, mapIndex = start >> UTRIE2_SHIFT_2;
-                    i > 0;
-                    --i
-                ) {
+                /* no overlap && newStart==start */
+                for (i = blockCount, mapIndex = start >> UTRIE2_SHIFT_2; i > 0; --i) {
                     this.map[mapIndex++] = start;
                     start += UTRIE2_DATA_BLOCK_LENGTH;
                 }
@@ -732,7 +700,7 @@ export class TrieBuilder {
         /* ensure that we do not even partially get past dataLength */
         dataLength -= blockLength;
         for (; block <= dataLength; block += UTRIE2_DATA_GRANULARITY) {
-            if (equal_int(this.data, block, otherBlock, blockLength)) {
+            if (equalInt(this.data, block, otherBlock, blockLength)) {
                 return block;
             }
         }
@@ -743,9 +711,7 @@ export class TrieBuilder {
         let highValue = this.get(0x10ffff);
         /* find highStart and round it up */
         let localHighStart = this.findHighStart(highValue);
-        localHighStart =
-            (localHighStart + (UTRIE2_CP_PER_INDEX_1_ENTRY - 1)) &
-            ~(UTRIE2_CP_PER_INDEX_1_ENTRY - 1);
+        localHighStart = (localHighStart + (UTRIE2_CP_PER_INDEX_1_ENTRY - 1)) & ~(UTRIE2_CP_PER_INDEX_1_ENTRY - 1);
         if (localHighStart === 0x110000) {
             highValue = this.errorValue;
         }
@@ -804,7 +770,7 @@ export class TrieBuilder {
             /* look for maximum overlap with the previous, adjacent block */
             for (
                 overlap = UTRIE2_INDEX_2_BLOCK_LENGTH - 1;
-                overlap > 0 && !equal_int(this.index2, newStart - overlap, start, overlap);
+                overlap > 0 && !equalInt(this.index2, newStart - overlap, start, overlap);
                 --overlap
             ) {}
             if (overlap > 0 || newStart < start) {
@@ -844,7 +810,7 @@ export class TrieBuilder {
         /* ensure that we do not even partially get past index2Length */
         index2Length -= UTRIE2_INDEX_2_BLOCK_LENGTH;
         for (let block = 0; block <= index2Length; ++block) {
-            if (equal_int(this.index2, block, otherBlock, UTRIE2_INDEX_2_BLOCK_LENGTH)) {
+            if (equalInt(this.index2, block, otherBlock, UTRIE2_INDEX_2_BLOCK_LENGTH)) {
                 return block;
             }
         }
@@ -876,14 +842,7 @@ export class TrieBuilder {
         return block === this.dataNullOffset;
     }
 
-    fillBlock(
-        block: int,
-        start: int,
-        limit: int,
-        value: int,
-        initialValue: int,
-        overwrite: boolean
-    ) {
+    fillBlock(block: int, start: int, limit: int, value: int, initialValue: int, overwrite: boolean) {
         const pLimit = block + limit;
         if (overwrite) {
             for (let i = block + start; i < pLimit; i++) {
@@ -979,10 +938,7 @@ export class TrieBuilder {
             this.dataLength = newTop;
         }
 
-        this.data.set(
-            this.data.subarray(copyBlock, copyBlock + UTRIE2_DATA_BLOCK_LENGTH),
-            newBlock
-        );
+        this.data.set(this.data.subarray(copyBlock, copyBlock + UTRIE2_DATA_BLOCK_LENGTH), newBlock);
         this.map[newBlock >> UTRIE2_SHIFT_2] = 0;
         return newBlock;
     }
@@ -1000,10 +956,7 @@ export class TrieBuilder {
         }
         this.index2Length = newTop;
         this.index2.set(
-            this.index2.subarray(
-                this.index2NullOffset,
-                this.index2NullOffset + UTRIE2_INDEX_2_BLOCK_LENGTH
-            ),
+            this.index2.subarray(this.index2NullOffset, this.index2NullOffset + UTRIE2_INDEX_2_BLOCK_LENGTH),
             newBlock
         );
         return newBlock;
@@ -1013,10 +966,7 @@ export class TrieBuilder {
 export const serializeBase64 = (trie: Trie): string => {
     const index = trie.index;
     const data = trie.data;
-    if (
-        !(index instanceof Uint16Array) ||
-        !(data instanceof Uint16Array || data instanceof Uint32Array)
-    ) {
+    if (!(index instanceof Uint16Array) || !(data instanceof Uint16Array || data instanceof Uint32Array)) {
         throw new Error('TrieBuilder serializer only support TypedArrays');
     }
     const headerLength = Uint32Array.BYTES_PER_ELEMENT * 6;
@@ -1036,10 +986,7 @@ export const serializeBase64 = (trie: Trie): string => {
     if (data.BYTES_PER_ELEMENT === Uint16Array.BYTES_PER_ELEMENT) {
         view16.set(data, (headerLength + index.byteLength) / Uint16Array.BYTES_PER_ELEMENT);
     } else {
-        view32.set(
-            data,
-            Math.ceil((headerLength + index.byteLength) / Uint32Array.BYTES_PER_ELEMENT)
-        );
+        view32.set(data, Math.ceil((headerLength + index.byteLength) / Uint32Array.BYTES_PER_ELEMENT));
     }
 
     return encode(buffer);

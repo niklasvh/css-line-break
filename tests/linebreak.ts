@@ -1,13 +1,13 @@
 // Generated tests from LineBreakTest.txt, do NOT modify
 'use strict';
-import assert from 'assert';
+import {equal} from 'assert';
 import {lineBreakAtIndex, codePointsToCharacterClasses, BREAK_MANDATORY, BREAK_ALLOWED} from '../src/LineBreak';
 
-const test = (codePoints, breaks) => {
-    breaks.forEach((c, i) => {
-		const b = lineBreakAtIndex(codePoints, i).replace(BREAK_MANDATORY, BREAK_ALLOWED);
-		assert.equal(b, c, `${b} at ${i}, expected ${c} with ${codePointsToCharacterClasses(codePoints)}`);
-	});
+const test = (codePoints: number[], breaks: string[]) => {
+    breaks.forEach((c: string, i: number) => {
+        const b = lineBreakAtIndex(codePoints, i).replace(BREAK_MANDATORY, BREAK_ALLOWED);
+        equal(b, c, `${b} at ${i}, expected ${c} with ${codePointsToCharacterClasses(codePoints)}`);
+    });
 };
 
 describe('LineBreakTest.txt', () => {

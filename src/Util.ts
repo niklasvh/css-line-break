@@ -1,7 +1,4 @@
-/* @flow */
-'use strict';
-
-export const toCodePoints = (str: string): Array<number> => {
+export const toCodePoints = (str: string): number[] => {
     const codePoints = [];
     let i = 0;
     const length = str.length;
@@ -22,7 +19,7 @@ export const toCodePoints = (str: string): Array<number> => {
     return codePoints;
 };
 
-export const fromCodePoint = (...codePoints: Array<number>): string => {
+export const fromCodePoint = (...codePoints: number[]): string => {
     if (String.fromCodePoint) {
         return String.fromCodePoint(...codePoints);
     }
@@ -60,7 +57,7 @@ for (let i = 0; i < chars.length; i++) {
     lookup[chars.charCodeAt(i)] = i;
 }
 
-export const decode = (base64: string): ArrayBuffer | Array<number> => {
+export const decode = (base64: string): ArrayBuffer | number[] => {
     let bufferLength = base64.length * 0.75,
         len = base64.length,
         i,
@@ -99,7 +96,7 @@ export const decode = (base64: string): ArrayBuffer | Array<number> => {
     return buffer;
 };
 
-export const polyUint16Array = (buffer: Array<number>): Array<number> => {
+export const polyUint16Array = (buffer: number[]): number[] => {
     const length = buffer.length;
     const bytes = [];
     for (let i = 0; i < length; i += 2) {
@@ -108,13 +105,11 @@ export const polyUint16Array = (buffer: Array<number>): Array<number> => {
     return bytes;
 };
 
-export const polyUint32Array = (buffer: Array<number>): Array<number> => {
+export const polyUint32Array = (buffer: number[]): number[] => {
     const length = buffer.length;
     const bytes = [];
     for (let i = 0; i < length; i += 4) {
-        bytes.push(
-            (buffer[i + 3] << 24) | (buffer[i + 2] << 16) | (buffer[i + 1] << 8) | buffer[i]
-        );
+        bytes.push((buffer[i + 3] << 24) | (buffer[i + 2] << 16) | (buffer[i + 1] << 8) | buffer[i]);
     }
     return bytes;
 };
