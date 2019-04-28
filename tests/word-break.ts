@@ -1,25 +1,26 @@
 'use strict';
-import assert from 'assert';
+import {equal} from 'assert';
 import {fromCodePoint, toCodePoints} from '../src/Util';
-import {BREAK_ALLOWED, BREAK_MANDATORY, BREAK_NOT_ALLOWED, inlineBreakOpportunities} from '../src/LineBreak';
+import {
+    BREAK_ALLOWED, BREAK_MANDATORY, BREAK_NOT_ALLOWED, inlineBreakOpportunities,
+    WORD_BREAK
+} from '../src/LineBreak';
 
 const breakTypes = [BREAK_MANDATORY, BREAK_NOT_ALLOWED, BREAK_ALLOWED].map(c => c.codePointAt(0));
 
-const test = (str, wordBreak) => {
-    const codePoints = [];
-    const breakPoints = [];
-    let index = 0;
+const test = (str: string, wordBreak: WORD_BREAK) => {
+    const codePoints: number[] = [];
+    const breakPoints: number[] = [];
 
     toCodePoints(str).forEach((codePoint) => {
         if (breakTypes.indexOf(codePoint) === -1) {
             codePoints.push(codePoint);
-            index++;
         } else {
             breakPoints.push(codePoint);
         }
     });
 
-    assert.equal(inlineBreakOpportunities(fromCodePoint(...codePoints), {wordBreak, lineBreak: 'normal'}), str);
+    equal(inlineBreakOpportunities(fromCodePoint(...codePoints), {wordBreak, lineBreak: 'normal'}), str);
 };
 
 describe('CSS word-break', () => {

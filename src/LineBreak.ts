@@ -2,7 +2,7 @@
 'use strict';
 
 import {createTrieFromBase64} from './Trie';
-import base64 from './linebreak-trie';
+import {base64} from './linebreak-trie';
 import {fromCodePoint, toCodePoints} from './Util';
 
 export const LETTER_NUMBER_MODIFIER = 50;
@@ -56,7 +56,7 @@ const RI = 41; //  Keep pairs together. For pairs; break before and after other 
 const SA = 42; //  Provide a line break opportunity contingent on additional, language-specific context analysis
 const XX = 43; //  Have as yet unknown line breaking behavior or unassigned code positions
 
-export const classes = {
+export const classes: {[key: string]: number} = {
     BK,
     CR,
     LF,
@@ -99,7 +99,7 @@ export const classes = {
     JT,
     RI,
     SA,
-    XX
+    XX,
 };
 
 export const BREAK_MANDATORY = '!';
@@ -116,12 +116,12 @@ const KOREAN_SYLLABLE_BLOCK = [JL, JV, JT, H2, H3];
 const HYPHEN = [HY, BA];
 
 export const codePointsToCharacterClasses = (
-    codePoints: Array<number>,
-    lineBreak: ?string = 'strict'
-): [Array<number>, Array<number>, Array<boolean>] => {
-    const types = [];
-    const indicies = [];
-    const categories = [];
+    codePoints: number[],
+    lineBreak: string = 'strict'
+): [number[], number[], boolean[]] => {
+    const types: number[] = [];
+    const indicies: number[] = [];
+    const categories: boolean[] = [];
     codePoints.forEach((codePoint, index) => {
         let classType = UnicodeTrie.get(codePoint);
         if (classType > LETTER_NUMBER_MODIFIER) {
@@ -175,10 +175,7 @@ export const codePointsToCharacterClasses = (
         // and characters in the ranges 20000..2FFFD and 30000..3FFFD as ID, until the implementation can be revised
         // to take into account the actual line breaking properties for these characters.
         if (classType === XX) {
-            if (
-                (codePoint >= 0x20000 && codePoint <= 0x2fffd) ||
-                (codePoint >= 0x30000 && codePoint <= 0x3fffd)
-            ) {
+            if ((codePoint >= 0x20000 && codePoint <= 0x2fffd) || (codePoint >= 0x30000 && codePoint <= 0x3fffd)) {
                 return types.push(ID);
             } else {
                 return types.push(AL);
@@ -192,10 +189,10 @@ export const codePointsToCharacterClasses = (
 };
 
 const isAdjacentWithSpaceIgnored = (
-    a: Array<number> | number,
+    a: number[] | number,
     b: number,
     currentIndex: number,
-    classTypes: Array<number>
+    classTypes: number[]
 ): boolean => {
     const current = classTypes[currentIndex];
     if (Array.isArray(a) ? a.indexOf(current) !== -1 : a === current) {
@@ -245,7 +242,7 @@ const isAdjacentWithSpaceIgnored = (
     return false;
 };
 
-const previousNonSpaceClassType = (currentIndex: number, classTypes: Array<number>): number => {
+const previousNonSpaceClassType = (currentIndex: number, classTypes: number[]): number => {
     let i = currentIndex;
     while (i >= 0) {
         let type = classTypes[i];
@@ -259,11 +256,11 @@ const previousNonSpaceClassType = (currentIndex: number, classTypes: Array<numbe
 };
 
 const _lineBreakAtIndex = (
-    codePoints: Array<number>,
-    classTypes: Array<number>,
-    indicies: Array<number>,
+    codePoints: number[],
+    classTypes: number[],
+    indicies: number[],
     index: number,
-    forbiddenBreaks: ?Array<boolean>
+    forbiddenBreaks?: boolean[]
 ) => {
     if (indicies[index] === 0) {
         return BREAK_NOT_ALLOWED;
@@ -307,10 +304,7 @@ const _lineBreakAtIndex = (
     }
 
     // LB8a Do not break between a zero width joiner and an ideograph, emoji base or emoji modifier.
-    if (
-        UnicodeTrie.get(codePoints[currentIndex]) === ZWJ &&
-        (next === ID || next === EB || next === EM)
-    ) {
+    if (UnicodeTrie.get(codePoints[currentIndex]) === ZWJ && (next === ID || next === EB || next === EM)) {
         return BREAK_NOT_ALLOWED;
     }
 
@@ -390,10 +384,7 @@ const _lineBreakAtIndex = (
     }
 
     // LB23 Do not break between digits and letters.
-    if (
-        (ALPHABETICS.indexOf(next) !== -1 && current === NU) ||
-        (ALPHABETICS.indexOf(current) !== -1 && next === NU)
-    ) {
+    if ((ALPHABETICS.indexOf(next) !== -1 && current === NU) || (ALPHABETICS.indexOf(current) !== -1 && next === NU)) {
         return BREAK_NOT_ALLOWED;
     }
 
@@ -417,8 +408,7 @@ const _lineBreakAtIndex = (
     if (
         // (PR | PO) × ( OP | HY )? NU
         ([PR, PO].indexOf(current) !== -1 &&
-            (next === NU ||
-                ([OP, HY].indexOf(next) !== -1 && classTypes[afterIndex + 1] === NU))) ||
+            (next === NU || ([OP, HY].indexOf(next) !== -1 && classTypes[afterIndex + 1] === NU))) ||
         // ( OP | HY ) × NU
         ([OP, HY].indexOf(current) !== -1 && next === NU) ||
         // NU ×	(NU | SY | IS)
@@ -518,7 +508,7 @@ const _lineBreakAtIndex = (
     return BREAK_ALLOWED;
 };
 
-export const lineBreakAtIndex = (codePoints: Array<number>, index: number) => {
+export const lineBreakAtIndex = (codePoints: number[], index: number) => {
     // LB2 Never break at the start of text.
     if (index === 0) {
         return BREAK_NOT_ALLOWED;
@@ -534,25 +524,22 @@ export const lineBreakAtIndex = (codePoints: Array<number>, index: number) => {
     return _lineBreakAtIndex(codePoints, classTypes, indicies, index);
 };
 
-type LINE_BREAK = 'auto' | 'normal' | 'strict';
-type WORD_BREAK = 'normal' | 'break-all' | 'break-word' | 'keep-all';
+export type LINE_BREAK = 'auto' | 'normal' | 'strict';
+export type WORD_BREAK = 'normal' | 'break-all' | 'break-word' | 'keep-all';
 
-export type Options = {
-    lineBreak: ?LINE_BREAK,
-    wordBreak: ?WORD_BREAK
-};
+interface IOptions {
+    lineBreak?: LINE_BREAK;
+    wordBreak?: WORD_BREAK;
+}
 
 const cssFormattedClasses = (
-    codePoints: Array<number>,
-    options: ?Options
-): [Array<number>, Array<number>, ?Array<boolean>] => {
+    codePoints: number[],
+    options?: IOptions
+): [number[], number[], boolean[] | undefined] => {
     if (!options) {
         options = {lineBreak: 'normal', wordBreak: 'normal'};
     }
-    let [indicies, classTypes, isLetterNumber] = codePointsToCharacterClasses(
-        codePoints,
-        options.lineBreak
-    );
+    let [indicies, classTypes, isLetterNumber] = codePointsToCharacterClasses(codePoints, options.lineBreak);
 
     if (options.wordBreak === 'break-all' || options.wordBreak === 'break-word') {
         classTypes = classTypes.map(type => ([NU, AL, SA].indexOf(type) !== -1 ? ID : type));
@@ -560,15 +547,15 @@ const cssFormattedClasses = (
 
     const forbiddenBreakpoints =
         options.wordBreak === 'keep-all'
-            ? isLetterNumber.map((isLetterNumber, i) => {
-                  return isLetterNumber && codePoints[i] >= 0x4e00 && codePoints[i] <= 0x9fff;
+            ? isLetterNumber.map((letterNumber, i) => {
+                  return letterNumber && codePoints[i] >= 0x4e00 && codePoints[i] <= 0x9fff;
               })
-            : null;
+            : undefined;
 
     return [indicies, classTypes, forbiddenBreakpoints];
 };
 
-export const inlineBreakOpportunities = (str: string, options: ?Options): string => {
+export const inlineBreakOpportunities = (str: string, options?: IOptions): string => {
     const codePoints = toCodePoints(str);
     let output = BREAK_NOT_ALLOWED;
     const [indicies, classTypes, forbiddenBreakpoints] = cssFormattedClasses(codePoints, options);
@@ -585,24 +572,38 @@ export const inlineBreakOpportunities = (str: string, options: ?Options): string
 };
 
 class Break {
-    _codePoints: Array<number>;
-    required: boolean;
-    start: number;
-    end: number;
+    private readonly codePoints: number[];
+    readonly required: boolean;
+    readonly start: number;
+    readonly end: number;
 
-    constructor(codePoints: Array<number>, lineBreak: string, start: number, end: number) {
-        this._codePoints = codePoints;
+    constructor(codePoints: number[], lineBreak: string, start: number, end: number) {
+        this.codePoints = codePoints;
         this.required = lineBreak === BREAK_MANDATORY;
         this.start = start;
         this.end = end;
     }
 
     slice(): string {
-        return fromCodePoint(...this._codePoints.slice(this.start, this.end));
+        return fromCodePoint(...this.codePoints.slice(this.start, this.end));
     }
 }
 
-export const LineBreaker = (str: string, options: ?Options) => {
+export type LineBreak =
+    | {
+          done: true;
+          value: null;
+      }
+    | {
+          done: false;
+          value: Break;
+      };
+
+interface ILineBreakIterator {
+    next: () => LineBreak;
+}
+
+export const LineBreaker = (str: string, options?: IOptions): ILineBreakIterator => {
     const codePoints = toCodePoints(str);
     const [indicies, classTypes, forbiddenBreakpoints] = cssFormattedClasses(codePoints, options);
     const length = codePoints.length;
@@ -612,18 +613,13 @@ export const LineBreaker = (str: string, options: ?Options) => {
     return {
         next: () => {
             if (nextIndex >= length) {
-                return {done: true};
+                return {done: true, value: null};
             }
             let lineBreak = BREAK_NOT_ALLOWED;
             while (
                 nextIndex < length &&
-                (lineBreak = _lineBreakAtIndex(
-                    codePoints,
-                    classTypes,
-                    indicies,
-                    ++nextIndex,
-                    forbiddenBreakpoints
-                )) === BREAK_NOT_ALLOWED
+                (lineBreak = _lineBreakAtIndex(codePoints, classTypes, indicies, ++nextIndex, forbiddenBreakpoints)) ===
+                    BREAK_NOT_ALLOWED
             ) {}
 
             if (lineBreak !== BREAK_NOT_ALLOWED || nextIndex === length) {
@@ -632,7 +628,7 @@ export const LineBreaker = (str: string, options: ?Options) => {
                 return {value, done: false};
             }
 
-            return {done: true};
-        }
+            return {done: true, value: null};
+        },
     };
 };

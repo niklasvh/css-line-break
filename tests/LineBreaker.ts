@@ -1,5 +1,4 @@
-'use strict';
-import assert from 'assert';
+import {deepEqual} from 'assert';
 import {LineBreaker} from '../src/LineBreak';
 
 describe('LineBreaker', () => {
@@ -10,10 +9,12 @@ describe('LineBreaker', () => {
         let bk;
 
         while (!(bk = breaker.next()).done) {
-            words.push(bk.value.slice());
+            if (bk.value) {
+                words.push(bk.value.slice());
+            }
         }
 
-        assert.deepEqual(words, ['Lorem ', 'ipsum ', 'lol.']);
+        deepEqual(words, ['Lorem ', 'ipsum ', 'lol.']);
     });
 
     it('Works with options', () => {
@@ -23,11 +24,12 @@ describe('LineBreaker', () => {
         let bk;
 
         while (!(bk = breaker.next()).done) {
-            words.push(bk.value.slice());
+            if (bk.value) {
+                words.push(bk.value.slice());
+            }
         }
 
-
-        assert.deepEqual(words, [
+        deepEqual(words, [
             '次の', '単語グ', 'レー', 'ト', 'ブ', 'リ', 'テ', 'ン',
             'お', 'よ', 'び', '北ア', 'イ', 'ル', 'ラ', 'ン', 'ド',
             '連合王国で', '本当に', '大き', 'な', '言葉'
