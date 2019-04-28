@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/css-line-break.umd.js",
   "module": "dist/css-line-break.es5.js",
-  "typings": "dist/types/css-line-break.d.ts",
+  "typings": "dist/types/index.d.ts",
   "scripts": {
     "prebuild": "rimraf dist/",
     "build": "tsc --module commonjs && rollup -c rollup.config.ts",

@@ -2,7 +2,9 @@ src/
 tests/
 scripts/
 .github/
-.babelrc
 .npmignore
-.eslintrc
+.prettierrc
+tslint.json
+tsconfig.json
 .travis.yml
+.rpt2_cache
