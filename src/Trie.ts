@@ -69,17 +69,33 @@ export const UTRIE2_INDEX_2_BLOCK_LENGTH = 1 << UTRIE2_SHIFT_1_2;
 /** Mask for getting the lower bits for the in-index-2-block offset. */
 export const UTRIE2_INDEX_2_MASK = UTRIE2_INDEX_2_BLOCK_LENGTH - 1;
 
+const slice16 = (view: number[] | Uint16Array, start: number, end?: number) => {
+    if (view.slice) {
+        return view.slice(start, end);
+    }
+
+    return new Uint16Array(Array.prototype.slice.call(view, start, end))
+};
+
+const slice32 = (view: number[] | Uint32Array, start: number, end?: number) => {
+    if (view.slice) {
+        return view.slice(start, end);
+    }
+
+    return new Uint32Array(Array.prototype.slice.call(view, start, end));
+};
+
 export const createTrieFromBase64 = (base64: string): Trie => {
     const buffer = decode(base64);
     const view32 = Array.isArray(buffer) ? polyUint32Array(buffer) : new Uint32Array(buffer);
     const view16 = Array.isArray(buffer) ? polyUint16Array(buffer) : new Uint16Array(buffer);
     const headerLength = 24;
 
-    const index = view16.slice(headerLength / 2, view32[4] / 2);
+    const index = slice16(view16, headerLength / 2, view32[4] / 2);
     const data =
         view32[5] === 2
-            ? view16.slice((headerLength + view32[4]) / 2)
-            : view32.slice(Math.ceil((headerLength + view32[4]) / 4));
+            ? slice16(view16, (headerLength + view32[4]) / 2)
+            : slice32(view32, Math.ceil((headerLength + view32[4]) / 4));
 
     return new Trie(view32[0], view32[1], view32[2], view32[3], index, data);
 };
