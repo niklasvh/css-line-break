@@ -30,22 +30,23 @@ The `LineBreaker` creates an [iterator](https://developer.mozilla.org/en-US/docs
     LineBreaker(text, [options]);
     
 ### Example
-    import {LineBreaker} from 'css-line-break';
-    
-    const breaker = LineBreaker('Lorem ipsum lol.', {
-        lineBreak: 'strict',
-        wordBreak: 'break-word'
-    });
+```javascript
+import {LineBreaker} from 'css-line-break';
 
-    const words = [];
-    let bk;
+const breaker = LineBreaker('Lorem ipsum lol.', {
+    lineBreak: 'strict',
+    wordBreak: 'break-word'
+});
 
-    while (!(bk = breaker.next()).done) {
-        words.push(bk.value.slice());
-    }
+const words = [];
+let bk;
 
-    assert.deepEqual(words, ['Lorem ', 'ipsum ', 'lol.']);
-    
+while (!(bk = breaker.next()).done) {
+    words.push(bk.value.slice());
+}
+
+assert.deepEqual(words, ['Lorem ', 'ipsum ', 'lol.']);
+```
 ### Options
 The following parameters are available for the options:
 
