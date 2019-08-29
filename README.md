@@ -34,7 +34,7 @@ The `LineBreaker` creates an [iterator](https://developer.mozilla.org/en-US/docs
     
     const breaker = LineBreaker('Lorem ipsum lol.', {
         lineBreak: 'strict',
-        wordBreak: 'break-word'
+        wordBreak: 'normal'
     });
 
     const words = [];
