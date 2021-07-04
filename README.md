@@ -1,7 +1,7 @@
 css-line-break
 ==============
 
-[![Build Status](https://travis-ci.org/niklasvh/css-line-break.svg)](https://travis-ci.org/niklasvh/css-line-break)
+![CI](https://github.com/niklasvh/html2canvas/workflows/CI/badge.svg?branch=master)
 [![NPM Downloads](https://img.shields.io/npm/dm/css-line-break.svg)](https://www.npmjs.org/package/css-line-break)
 [![NPM Version](https://img.shields.io/npm/v/css-line-break.svg)](https://www.npmjs.org/package/css-line-break)
 
@@ -30,22 +30,24 @@ The `LineBreaker` creates an [iterator](https://developer.mozilla.org/en-US/docs
     LineBreaker(text, [options]);
     
 ### Example
-    import {LineBreaker} from 'css-line-break';
-    
-    const breaker = LineBreaker('Lorem ipsum lol.', {
-        lineBreak: 'strict',
-        wordBreak: 'break-word'
-    });
+[JSFiddle](https://jsfiddle.net/ofd3752k)
+```javascript
+import {LineBreaker} from 'css-line-break';
 
-    const words = [];
-    let bk;
+const breaker = LineBreaker('Lorem ipsum lol.', {
+    lineBreak: 'strict',
+    wordBreak: 'normal'
+});
 
-    while (!(bk = breaker.next()).done) {
-        words.push(bk.value.slice());
-    }
+const words = [];
+let bk;
 
-    assert.deepEqual(words, ['Lorem ', 'ipsum ', 'lol.']);
-    
+while (!(bk = breaker.next()).done) {
+    words.push(bk.value.slice());
+}
+
+assert.deepEqual(words, ['Lorem ', 'ipsum ', 'lol.']);
+```    
 ### Options
 The following parameters are available for the options:
 
