@@ -30,12 +30,13 @@ The `LineBreaker` creates an [iterator](https://developer.mozilla.org/en-US/docs
     LineBreaker(text, [options]);
     
 ### Example
+[JSFiddle](https://jsfiddle.net/ofd3752k)
 ```javascript
 import {LineBreaker} from 'css-line-break';
 
 const breaker = LineBreaker('Lorem ipsum lol.', {
     lineBreak: 'strict',
-    wordBreak: 'break-word'
+    wordBreak: 'normal'
 });
 
 const words = [];
