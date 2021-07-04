@@ -31,6 +31,8 @@
     "base64-arraybuffer": "^0.2.0"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^19.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.0",
     "@rollup/plugin-typescript": "^8.2.1",
     "@types/mocha": "^8.2.2",
     "@types/node": "^16.0.0",
@@ -38,9 +40,7 @@
     "prettier": "^2.3.2",
     "rimraf": "3.0.2",
     "rollup": "^2.52.7",
-    "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "standard-version": "^9.3.0",
     "ts-node": "^10.0.0",
