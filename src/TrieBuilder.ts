@@ -14,7 +14,7 @@ import {
     UTRIE2_INDEX_2_MASK,
     UTRIE2_SHIFT_1_2,
     Trie,
-    int
+    int,
 } from './Trie';
 
 import {encode} from 'base64-arraybuffer';
@@ -288,10 +288,10 @@ export class TrieBuilder {
      */
     setRange(start: int, end: int, value: int, overwrite: boolean = false): TrieBuilder {
         /*
-     * repeat value in [start..end]
-     * mark index values for repeat-data blocks by setting bit 31 of the index values
-     * fill around existing values if any, if(overwrite)
-     */
+         * repeat value in [start..end]
+         * mark index values for repeat-data blocks by setting bit 31 of the index values
+         * fill around existing values if any, if(overwrite)
+         */
         let block, rest, repeatBlock;
         if (start > 0x10ffff || start < 0 || end > 0x10ffff || end < 0 || start > end) {
             throw new Error('Invalid code point range.');
@@ -351,10 +351,10 @@ export class TrieBuilder {
                 /* already allocated */
                 if (overwrite && block >= UNEWTRIE2_DATA_0800_OFFSET) {
                     /*
-             * We overwrite all values, and it's not a
-             * protected (ASCII-linear or 2-byte UTF-8) block:
-             * replace with the repeatBlock.
-             */
+                     * We overwrite all values, and it's not a
+                     * protected (ASCII-linear or 2-byte UTF-8) block:
+                     * replace with the repeatBlock.
+                     */
                     setRepeatBlock = true;
                 } else {
                     /* !overwrite, or protected block: just write the values into this block */
@@ -362,21 +362,21 @@ export class TrieBuilder {
                 }
             } else if (this.data[block] !== value && (overwrite || block === this.dataNullOffset)) {
                 /*
-             * Set the repeatBlock instead of the null block or previous repeat block:
-             *
-             * If !isWritableBlock() then all entries in the block have the same value
-             * because it's the null block or a range block (the repeatBlock from a previous
-             * call to utrie2_setRange32()).
-             * No other blocks are used multiple times before compacting.
-             *
-             * The null block is the only non-writable block with the initialValue because
-             * of the repeatBlock initialization above. (If value==initialValue, then
-             * the repeatBlock will be the null data block.)
-             *
-             * We set our repeatBlock if the desired value differs from the block's value,
-             * and if we overwrite any data or if the data is all initial values
-             * (which is the same as the block being the null block, see above).
-             */
+                 * Set the repeatBlock instead of the null block or previous repeat block:
+                 *
+                 * If !isWritableBlock() then all entries in the block have the same value
+                 * because it's the null block or a range block (the repeatBlock from a previous
+                 * call to utrie2_setRange32()).
+                 * No other blocks are used multiple times before compacting.
+                 *
+                 * The null block is the only non-writable block with the initialValue because
+                 * of the repeatBlock initialization above. (If value==initialValue, then
+                 * the repeatBlock will be the null data block.)
+                 *
+                 * We set our repeatBlock if the desired value differs from the block's value,
+                 * and if we overwrite any data or if the data is all initial values
+                 * (which is the same as the block being the null block, see above).
+                 */
                 setRepeatBlock = true;
             }
             if (setRepeatBlock) {
@@ -484,9 +484,9 @@ export class TrieBuilder {
             }
 
             /*
-     * write the index-2 array values for supplementary code points,
-     * shifted right by UTRIE2_INDEX_SHIFT, after adding dataMove
-     */
+             * write the index-2 array values for supplementary code points,
+             * shifted right by UTRIE2_INDEX_SHIFT, after adding dataMove
+             */
             for (i = 0; i < this.index2Length - index2Offset; i++) {
                 index[destIdx++] = (dataMove + this.index2[index2Offset + i]) >> UTRIE2_INDEX_SHIFT;
             }
@@ -615,17 +615,17 @@ export class TrieBuilder {
             this.map[i] = start;
         }
         /*
-     * Start with a block length of 64 for 2-byte UTF-8,
-     * then switch to UTRIE2_DATA_BLOCK_LENGTH.
-     */
+         * Start with a block length of 64 for 2-byte UTF-8,
+         * then switch to UTRIE2_DATA_BLOCK_LENGTH.
+         */
         blockLength = 64;
         blockCount = blockLength >> UTRIE2_SHIFT_2;
         for (start = newStart; start < this.dataLength; ) {
             /*
-         * start: index of first entry of current block
-         * newStart: index where the current block is to be moved
-         *           (right after current end of already-compacted data)
-         */
+             * start: index of first entry of current block
+             * newStart: index where the current block is to be moved
+             *           (right after current end of already-compacted data)
+             */
             if (start === UNEWTRIE2_DATA_0800_OFFSET) {
                 blockLength = UTRIE2_DATA_BLOCK_LENGTH;
                 blockCount = 1;

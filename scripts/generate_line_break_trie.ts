@@ -12,7 +12,7 @@ let rangeType: number | null = null;
 
 rawData
     .split('\n')
-    .map(s => {
+    .map((s) => {
         const index = s.indexOf('#');
         const first = (index === -1 ? s : s.substring(0, index)).trim();
         return index === -1

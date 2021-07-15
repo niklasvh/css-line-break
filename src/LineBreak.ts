@@ -56,6 +56,8 @@ const RI = 41; //  Keep pairs together. For pairs; break before and after other 
 const SA = 42; //  Provide a line break opportunity contingent on additional, language-specific context analysis
 const XX = 43; //  Have as yet unknown line breaking behavior or unassigned code positions
 
+const ea_OP = [0x2329, 0xff08];
+
 export const classes: {[key: string]: number} = {
     BK,
     CR,
@@ -304,7 +306,7 @@ const _lineBreakAtIndex = (
     }
 
     // LB8a Do not break between a zero width joiner and an ideograph, emoji base or emoji modifier.
-    if (UnicodeTrie.get(codePoints[currentIndex]) === ZWJ && (next === ID || next === EB || next === EM)) {
+    if (UnicodeTrie.get(codePoints[currentIndex]) === ZWJ) {
         return BREAK_NOT_ALLOWED;
     }
 
@@ -378,8 +380,8 @@ const _lineBreakAtIndex = (
         return BREAK_NOT_ALLOWED;
     }
 
-    // LB22 Do not break between two ellipses, or between letters, numbers or exclamations and ellipsis.
-    if (next === IN && ALPHABETICS.concat(IN, EX, NU, ID, EB, EM).indexOf(current) !== -1) {
+    // LB22 Do not break before ellipsis.
+    if (next === IN) {
         return BREAK_NOT_ALLOWED;
     }
 
@@ -476,7 +478,9 @@ const _lineBreakAtIndex = (
 
     // LB30 Do not break between letters, numbers, or ordinary symbols and opening or closing parentheses.
     if (
-        (ALPHABETICS.concat(NU).indexOf(current) !== -1 && next === OP) ||
+        (ALPHABETICS.concat(NU).indexOf(current) !== -1 &&
+            next === OP &&
+            ea_OP.indexOf(codePoints[afterIndex]) === -1) ||
         (ALPHABETICS.concat(NU).indexOf(next) !== -1 && current === CP)
     ) {
         return BREAK_NOT_ALLOWED;
@@ -532,17 +536,14 @@ interface IOptions {
     wordBreak?: WORD_BREAK;
 }
 
-const cssFormattedClasses = (
-    codePoints: number[],
-    options?: IOptions
-): [number[], number[], boolean[] | undefined] => {
+const cssFormattedClasses = (codePoints: number[], options?: IOptions): [number[], number[], boolean[] | undefined] => {
     if (!options) {
         options = {lineBreak: 'normal', wordBreak: 'normal'};
     }
     let [indicies, classTypes, isLetterNumber] = codePointsToCharacterClasses(codePoints, options.lineBreak);
 
     if (options.wordBreak === 'break-all') {
-        classTypes = classTypes.map(type => ([NU, AL, SA].indexOf(type) !== -1 ? ID : type));
+        classTypes = classTypes.map((type) => ([NU, AL, SA].indexOf(type) !== -1 ? ID : type));
     }
 
     const forbiddenBreakpoints =
