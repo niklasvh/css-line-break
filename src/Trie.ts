@@ -74,7 +74,7 @@ const slice16 = (view: number[] | Uint16Array, start: number, end?: number) => {
         return view.slice(start, end);
     }
 
-    return new Uint16Array(Array.prototype.slice.call(view, start, end))
+    return new Uint16Array(Array.prototype.slice.call(view, start, end));
 };
 
 const slice32 = (view: number[] | Uint32Array, start: number, end?: number) => {

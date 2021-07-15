@@ -39,7 +39,7 @@ export const fromCodePoint = (...codePoints: number[]): string => {
             codeUnits.push(codePoint);
         } else {
             codePoint -= 0x10000;
-            codeUnits.push((codePoint >> 10) + 0xd800, codePoint % 0x400 + 0xdc00);
+            codeUnits.push((codePoint >> 10) + 0xd800, (codePoint % 0x400) + 0xdc00);
         }
         if (index + 1 === length || codeUnits.length > 0x4000) {
             result += String.fromCharCode(...codeUnits);

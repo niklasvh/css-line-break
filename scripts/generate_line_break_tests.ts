@@ -4,10 +4,9 @@ import {BREAK_MANDATORY, BREAK_NOT_ALLOWED, BREAK_ALLOWED} from '../src/LineBrea
 
 const data = readFileSync(resolve(__dirname, '../tests/LineBreakTest.txt')).toString();
 const tests: string[] = [];
-data
-    .split('\n')
-    .filter(s => s.length > 0)
-    .forEach(s => {
+data.split('\n')
+    .filter((s) => s.length > 0)
+    .forEach((s) => {
         let [input, comment] = s.split('#');
         input = input.trim();
 
@@ -16,7 +15,7 @@ data
             const inputs = input.split(/\s+/g);
             const codePoints: string[] = [];
             const breaks: string[] = [];
-            inputs.forEach(input => {
+            inputs.forEach((input) => {
                 if ([BREAK_ALLOWED, BREAK_MANDATORY, BREAK_NOT_ALLOWED].indexOf(input) !== -1) {
                     breaks.push(input);
                 } else {
