@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0](https://github.com/niklasvh/css-line-break/compare/v1.1.3-0...v2.0.0) (2021-08-02)
+
+
+### fix
+
+* zwj emojis #2 (#16) ([a314ea3](https://github.com/niklasvh/css-line-break/commit/a314ea33768cde9dab4e673d3339d6b4f9c32196)), closes [#2](https://github.com/niklasvh/css-line-break/issues/2) [#16](https://github.com/niklasvh/css-line-break/issues/16)
+
+
+
 ## [1.1.3-0](https://github.com/niklasvh/css-line-break/compare/v1.1.2-0...v1.1.3-0) (2021-07-15)
 
 
