@@ -17,6 +17,21 @@ describe('LineBreaker', () => {
         deepEqual(words, ['Lorem ', 'ipsum ', 'lol.']);
     });
 
+    it('should handle zwj emojis', () => {
+        const breaker = LineBreaker('Text with zwj emojis 👨‍👩‍👧‍👦 and modifiers 🤷🏾‍♂️.');
+
+        const words = [];
+        let bk;
+
+        while (!(bk = breaker.next()).done) {
+            if (bk.value) {
+                words.push(bk.value.slice());
+            }
+        }
+
+        deepEqual(words, ['Text ', 'with ', 'zwj ', 'emojis ', '👨‍👩‍👧‍👦 ', 'and ', 'modifiers ', '🤷🏾‍♂️.']);
+    });
+
     it('Works with options', () => {
         const breaker = LineBreaker('次の単語グレートブリテンおよび北アイルランド連合王国で本当に大きな言葉', {wordBreak: 'keep-all'});
 

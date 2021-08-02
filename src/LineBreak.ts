@@ -122,7 +122,7 @@ export const codePointsToCharacterClasses = (
     lineBreak: string = 'strict'
 ): [number[], number[], boolean[]] => {
     const types: number[] = [];
-    const indicies: number[] = [];
+    const indices: number[] = [];
     const categories: boolean[] = [];
     codePoints.forEach((codePoint, index) => {
         let classType = UnicodeTrie.get(codePoint);
@@ -136,7 +136,7 @@ export const codePointsToCharacterClasses = (
         if (['normal', 'auto', 'loose'].indexOf(lineBreak) !== -1) {
             // U+2010, – U+2013, 〜 U+301C, ゠ U+30A0
             if ([0x2010, 0x2013, 0x301c, 0x30a0].indexOf(codePoint) !== -1) {
-                indicies.push(index);
+                indices.push(index);
                 return types.push(CB);
             }
         }
@@ -144,7 +144,7 @@ export const codePointsToCharacterClasses = (
         if (classType === CM || classType === ZWJ) {
             // LB10 Treat any remaining combining mark or ZWJ as AL.
             if (index === 0) {
-                indicies.push(index);
+                indices.push(index);
                 return types.push(AL);
             }
 
@@ -152,14 +152,14 @@ export const codePointsToCharacterClasses = (
             // the base character in all of the following rules. Treat ZWJ as if it were CM.
             const prev = types[index - 1];
             if (LINE_BREAKS.indexOf(prev) === -1) {
-                indicies.push(indicies[index - 1]);
+                indices.push(indices[index - 1]);
                 return types.push(prev);
             }
-            indicies.push(index);
+            indices.push(index);
             return types.push(AL);
         }
 
-        indicies.push(index);
+        indices.push(index);
 
         if (classType === CJ) {
             return types.push(lineBreak === 'strict' ? NS : ID);
@@ -187,7 +187,7 @@ export const codePointsToCharacterClasses = (
         types.push(classType);
     });
 
-    return [indicies, types, categories];
+    return [indices, types, categories];
 };
 
 const isAdjacentWithSpaceIgnored = (
@@ -257,13 +257,15 @@ const previousNonSpaceClassType = (currentIndex: number, classTypes: number[]): 
     return 0;
 };
 
+export type BREAK_OPPORTUNITIES = typeof BREAK_NOT_ALLOWED | typeof BREAK_ALLOWED | typeof BREAK_MANDATORY;
+
 const _lineBreakAtIndex = (
     codePoints: number[],
     classTypes: number[],
     indicies: number[],
     index: number,
     forbiddenBreaks?: boolean[]
-) => {
+): BREAK_OPPORTUNITIES => {
     if (indicies[index] === 0) {
         return BREAK_NOT_ALLOWED;
     }
@@ -305,8 +307,13 @@ const _lineBreakAtIndex = (
         return BREAK_ALLOWED;
     }
 
-    // LB8a Do not break between a zero width joiner and an ideograph, emoji base or emoji modifier.
+    // LB8a Do not break after a zero width joiner.
     if (UnicodeTrie.get(codePoints[currentIndex]) === ZWJ) {
+        return BREAK_NOT_ALLOWED;
+    }
+
+    // zwj emojis
+    if ((current === EB || current === EM) && UnicodeTrie.get(codePoints[afterIndex]) === ZWJ) {
         return BREAK_NOT_ALLOWED;
     }
 
@@ -512,7 +519,7 @@ const _lineBreakAtIndex = (
     return BREAK_ALLOWED;
 };
 
-export const lineBreakAtIndex = (codePoints: number[], index: number) => {
+export const lineBreakAtIndex = (codePoints: number[], index: number): BREAK_OPPORTUNITIES => {
     // LB2 Never break at the start of text.
     if (index === 0) {
         return BREAK_NOT_ALLOWED;
@@ -523,9 +530,9 @@ export const lineBreakAtIndex = (codePoints: number[], index: number) => {
         return BREAK_MANDATORY;
     }
 
-    const [indicies, classTypes] = codePointsToCharacterClasses(codePoints);
+    const [indices, classTypes] = codePointsToCharacterClasses(codePoints);
 
-    return _lineBreakAtIndex(codePoints, classTypes, indicies, index);
+    return _lineBreakAtIndex(codePoints, classTypes, indices, index);
 };
 
 export type LINE_BREAK = 'auto' | 'normal' | 'strict';

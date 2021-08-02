@@ -1,12 +1,19 @@
 // Generated tests from LineBreakTest.txt, do NOT modify
 'use strict';
-import {equal} from 'assert';
-import {lineBreakAtIndex, codePointsToCharacterClasses, BREAK_MANDATORY, BREAK_ALLOWED} from '../src/LineBreak';
+import {strictEqual} from 'assert';
+import {lineBreakAtIndex, codePointsToCharacterClasses, BREAK_MANDATORY, BREAK_ALLOWED, classes} from '../src/LineBreak';
+
+const reverseClasses: {[key: number]: string} = Object.keys(classes).reduce((acc: {[key: number]: string}, key: string) => {
+    acc[classes[key]] = key;
+    return acc;
+}, {});
 
 const test = (codePoints: number[], breaks: string[]) => {
+    const [indices, types] = codePointsToCharacterClasses(codePoints);
+
     breaks.forEach((c: string, i: number) => {
         const b = lineBreakAtIndex(codePoints, i).replace(BREAK_MANDATORY, BREAK_ALLOWED);
-        equal(b, c, `${b} at ${i}, expected ${c} with ${codePointsToCharacterClasses(codePoints)}`);
+        strictEqual(b, c, `${b} at ${i}, expected ${c} with indices ${indices} and types ${types.map((type) => reverseClasses[type])}`);
     });
 };
 

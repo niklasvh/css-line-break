@@ -15,11 +15,11 @@ data.split('\n')
             const inputs = input.split(/\s+/g);
             const codePoints: string[] = [];
             const breaks: string[] = [];
-            inputs.forEach((input) => {
-                if ([BREAK_ALLOWED, BREAK_MANDATORY, BREAK_NOT_ALLOWED].indexOf(input) !== -1) {
-                    breaks.push(input);
+            inputs.forEach((value) => {
+                if ([BREAK_ALLOWED, BREAK_MANDATORY, BREAK_NOT_ALLOWED].indexOf(value) !== -1) {
+                    breaks.push(value);
                 } else {
-                    codePoints.push(`0x${input}`);
+                    codePoints.push(`0x${value}`);
                 }
             });
             tests.push(`it('${comment}', () => test([${codePoints.join(', ')}], ${JSON.stringify(breaks)}));`);
@@ -28,13 +28,20 @@ data.split('\n')
 
 const template = `// Generated tests from LineBreakTest.txt, do NOT modify
 'use strict';
-import {equal} from 'assert';
-import {lineBreakAtIndex, codePointsToCharacterClasses, BREAK_MANDATORY, BREAK_ALLOWED} from '../src/LineBreak';
+import {strictEqual} from 'assert';
+import {lineBreakAtIndex, codePointsToCharacterClasses, BREAK_MANDATORY, BREAK_ALLOWED, classes} from '../src/LineBreak';
+
+const reverseClasses: {[key: number]: string} = Object.keys(classes).reduce((acc: {[key: number]: string}, key: string) => {
+    acc[classes[key]] = key;
+    return acc;
+}, {});
 
 const test = (codePoints: number[], breaks: string[]) => {
+    const [indices, types] = codePointsToCharacterClasses(codePoints);
+
     breaks.forEach((c: string, i: number) => {
         const b = lineBreakAtIndex(codePoints, i).replace(BREAK_MANDATORY, BREAK_ALLOWED);
-        equal(b, c, \`\${b} at \${i}, expected \${c} with \${codePointsToCharacterClasses(codePoints)}\`);
+        strictEqual(b, c, \`\${b} at \${i}, expected \${c} with indices \${indices} and types \${types.map((type) => reverseClasses[type])}\`);
     });
 };
 
