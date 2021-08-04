@@ -549,7 +549,7 @@ const cssFormattedClasses = (codePoints: number[], options?: IOptions): [number[
     }
     let [indicies, classTypes, isLetterNumber] = codePointsToCharacterClasses(codePoints, options.lineBreak);
 
-    if (options.wordBreak === 'break-all') {
+    if (options.wordBreak === 'break-all' || options.wordBreak === 'break-word') {
         classTypes = classTypes.map((type) => ([NU, AL, SA].indexOf(type) !== -1 ? ID : type));
     }
 
