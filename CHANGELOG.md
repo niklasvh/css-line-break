@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.1](https://github.com/niklasvh/css-line-break/compare/v2.0.0...v2.0.1) (2021-08-04)
+
+
+### fix
+
+* wordBreak break-word (#17) ([d615f1f](https://github.com/niklasvh/css-line-break/commit/d615f1f731c9074035d0dab843a17a64080ba7ba)), closes [#17](https://github.com/niklasvh/css-line-break/issues/17)
+
+
+
 # [2.0.0](https://github.com/niklasvh/css-line-break/compare/v1.1.3-0...v2.0.0) (2021-08-02)
 
 
