@@ -1,7 +1,7 @@
 css-line-break
 ==============
 
-![CI](https://github.com/niklasvh/html2canvas/workflows/CI/badge.svg?branch=master)
+![CI](https://github.com/niklasvh/css-line-break/workflows/CI/badge.svg?branch=master)
 [![NPM Downloads](https://img.shields.io/npm/dm/css-line-break.svg)](https://www.npmjs.org/package/css-line-break)
 [![NPM Version](https://img.shields.io/npm/v/css-line-break.svg)](https://www.npmjs.org/package/css-line-break)
 
