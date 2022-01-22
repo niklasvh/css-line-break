@@ -1,7 +1,7 @@
 import {writeFileSync, readFileSync} from 'fs';
 import {resolve} from 'path';
 import {classes, LETTER_NUMBER_MODIFIER} from '../src/LineBreak';
-import {TrieBuilder, serializeBase64} from '../src/TrieBuilder';
+import {TrieBuilder, serializeBase64} from 'utrie';
 
 const rawData = readFileSync(resolve(__dirname, '../src/LineBreak.txt')).toString();
 const builder = new TrieBuilder(classes.XX);
@@ -56,6 +56,10 @@ rawData
         }
     });
 
-const base64 = serializeBase64(builder.freeze(16));
-writeFileSync(resolve(__dirname, '../src/linebreak-trie.ts'), `export const base64 = "${base64}";`);
+const [base64, byteLength] = serializeBase64(builder.freeze(16));
+
+writeFileSync(
+    resolve(__dirname, '../src/linebreak-trie.ts'),
+    [`export const base64 = "${base64}";`, `export const byteLength = ${byteLength};`].join('\n')
+);
 console.log(`Trie created successfully`);
