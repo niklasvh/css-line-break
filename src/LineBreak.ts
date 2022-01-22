@@ -1,8 +1,7 @@
-/* @flow */
 'use strict';
 
-import {createTrieFromBase64} from './Trie';
-import {base64} from './linebreak-trie';
+import {createTrieFromBase64} from 'utrie';
+import {base64, byteLength} from './linebreak-trie';
 import {fromCodePoint, toCodePoints} from './Util';
 
 export const LETTER_NUMBER_MODIFIER = 50;
@@ -107,7 +106,7 @@ export const classes: {[key: string]: number} = {
 export const BREAK_MANDATORY = '!';
 export const BREAK_NOT_ALLOWED = '×';
 export const BREAK_ALLOWED = '÷';
-export const UnicodeTrie = createTrieFromBase64(base64);
+export const UnicodeTrie = createTrieFromBase64(base64, byteLength);
 
 const ALPHABETICS = [AL, HL];
 const HARD_LINE_BREAKS = [BK, CR, LF, NL];
