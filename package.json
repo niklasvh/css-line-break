@@ -1,6 +1,6 @@
 {
   "name": "css-line-break",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "",
   "main": "dist/css-line-break.umd.js",
   "module": "dist/css-line-break.es5.js",

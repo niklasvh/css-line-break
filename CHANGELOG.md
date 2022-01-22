@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.1.0](https://github.com/niklasvh/css-line-break/compare/v2.0.1...v2.1.0) (2022-01-22)
+
+
+### feat
+
+* update to use utrie dep (#20) ([18adab4](https://github.com/niklasvh/css-line-break/commit/18adab4010b54bb73add4f23c3325b27c2c13d91)), closes [#20](https://github.com/niklasvh/css-line-break/issues/20)
+
+### fix
+
+* source maps (#19) ([60cdede](https://github.com/niklasvh/css-line-break/commit/60cdedeaa025f685fc7002653f390233becce128)), closes [#19](https://github.com/niklasvh/css-line-break/issues/19)
+
+
+
 ## [2.0.1](https://github.com/niklasvh/css-line-break/compare/v2.0.0...v2.0.1) (2021-08-04)
 
 
