@@ -269,6 +269,11 @@ const _lineBreakAtIndex = (
         return BREAK_NOT_ALLOWED;
     }
 
+    // see LB9 in codePointsToCharacterClasses
+    if (indicies[index] === indicies[index -1]) {
+       return BREAK_NOT_ALLOWED;
+    }
+
     let currentIndex = index - 1;
     if (Array.isArray(forbiddenBreaks) && forbiddenBreaks[currentIndex] === true) {
         return BREAK_NOT_ALLOWED;
@@ -308,11 +313,6 @@ const _lineBreakAtIndex = (
 
     // LB8a Do not break after a zero width joiner.
     if (UnicodeTrie.get(codePoints[currentIndex]) === ZWJ) {
-        return BREAK_NOT_ALLOWED;
-    }
-
-    // zwj emojis
-    if ((current === EB || current === EM) && UnicodeTrie.get(codePoints[afterIndex]) === ZWJ) {
         return BREAK_NOT_ALLOWED;
     }
 

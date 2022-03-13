@@ -18,7 +18,7 @@ describe('LineBreaker', () => {
     });
 
     it('should handle zwj emojis', () => {
-        const breaker = LineBreaker('Text with zwj emojis 👨‍👩‍👧‍👦 and modifiers 🤷🏾‍♂️.');
+        const breaker = LineBreaker('Text with zwj emojis 👨‍👩‍👧‍👦 and 🏳️‍🌈 and modifiers 🤷🏾‍♂️.');
 
         const words = [];
         let bk;
@@ -29,7 +29,7 @@ describe('LineBreaker', () => {
             }
         }
 
-        deepEqual(words, ['Text ', 'with ', 'zwj ', 'emojis ', '👨‍👩‍👧‍👦 ', 'and ', 'modifiers ', '🤷🏾‍♂️.']);
+        deepEqual(words, ['Text ', 'with ', 'zwj ', 'emojis ', '👨‍👩‍👧‍👦 ', 'and ', '🏳️‍🌈 ', 'and ', 'modifiers ', '🤷🏾‍♂️.']);
     });
 
     it('Works with options', () => {
