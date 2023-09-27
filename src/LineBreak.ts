@@ -109,6 +109,7 @@ export const BREAK_ALLOWED = '÷';
 export const UnicodeTrie = createTrieFromBase64(base64, byteLength);
 
 const ALPHABETICS = [AL, HL];
+const ALPHABETICS_OR_NU = ALPHABETICS.concat(NU)
 const HARD_LINE_BREAKS = [BK, CR, LF, NL];
 const SPACE = [SP, ZW];
 const PREFIX_POSTFIX = [PR, PO];
@@ -484,10 +485,10 @@ const _lineBreakAtIndex = (
 
     // LB30 Do not break between letters, numbers, or ordinary symbols and opening or closing parentheses.
     if (
-        (ALPHABETICS.concat(NU).indexOf(current) !== -1 &&
+        (ALPHABETICS_OR_NU.indexOf(current) !== -1 &&
             next === OP &&
             ea_OP.indexOf(codePoints[afterIndex]) === -1) ||
-        (ALPHABETICS.concat(NU).indexOf(next) !== -1 && current === CP)
+        (ALPHABETICS_OR_NU.indexOf(next) !== -1 && current === CP)
     ) {
         return BREAK_NOT_ALLOWED;
     }
